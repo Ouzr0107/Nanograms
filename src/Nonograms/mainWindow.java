@@ -42,9 +42,13 @@ public class mainWindow extends JFrame {
         }
 
         //窗口参数设置
+        Toolkit kit = Toolkit.getDefaultToolkit();
+        Dimension screenSize = kit.getScreenSize();
+        int screenWidth = screenSize.width;
+        int screenHeight = screenSize.height;
         setTitle("Nonograms");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setBounds(100, 100, 600, 300);
+        setBounds((screenWidth - 600) / 2, (screenHeight - 600) / 2, 600, 600);
         setResizable(false);
         //创建主面板
         JPanel root = new JPanel();
@@ -54,13 +58,13 @@ public class mainWindow extends JFrame {
         //底部三个按钮
         JButton bt1 = new JButton("怎么玩？");
         bt1.addActionListener(e -> JOptionPane.showMessageDialog(null, "Nonograms是一种逻辑性图片益智游戏，\n玩家根据网格旁的数字，将网格中的方格填色或留空，从而展现一副隐藏的图画。\n这些数字通过离散断层方式来计算有多少条完整的线会被填入到横向或纵向的方格中。\n例如，“4 8 3”表示按顺序分别有4个、8个和3个连续方格要填色，\n且各组填色方格之间至少有一个留空方格。"));
-        bt1.setFont(new Font("微软雅黑", Font.PLAIN, 16));
-        bt1.setBounds(10, 220, 130, 20);
+        bt1.setFont(new Font("微软雅黑", Font.PLAIN, 24));
+        bt1.setBounds(20, 500, 130, 50);
         root.add(bt1);
 
         JButton bt2 = new JButton("提交");
-        bt2.setFont(new Font("微软雅黑", Font.PLAIN, 18));
-        bt2.setBounds(160, 218, 285, 25);
+        bt2.setFont(new Font("微软雅黑", Font.PLAIN, 45));
+        bt2.setBounds(160, 500, 280, 50);
         bt2.addActionListener(e -> {
             var userTopTable = new table(5, 3, 1, user.getList());
             var userLeftTable = new table(5, 3, 0, user.getList());
@@ -73,7 +77,7 @@ public class mainWindow extends JFrame {
                 Object[] obj = {};
                 ResultSet res = conn.select("select * from list", obj);
                 try {
-                    while (res.next()){
+                    while (res.next()) {
                         System.out.println(res.getString("userName"));
                     }
                 } catch (SQLException ex) {
@@ -87,16 +91,17 @@ public class mainWindow extends JFrame {
         root.add(bt2);
 
         JButton bt3 = new JButton("排行榜");
-        bt3.setFont(new Font("微软雅黑", Font.PLAIN, 16));
-        bt3.setBounds(465, 220, 110, 20);
+        bt3.setFont(new Font("微软雅黑", Font.PLAIN, 24));
+        bt3.setBounds(450, 500, 130, 50);
         root.add(bt3);
         //创建纵横数字栏
         JLabel[][] llb = new JLabel[5][3];
         for (int i = 0; i < 5; ++i) {
             for (int j = 0; j < 3; ++j) {
                 if (topTable.get(i, j) != 0) {
-                    llb[i][j] = new JLabel(String.valueOf(topTable.get(i, j)));
-                    llb[i][j].setBounds(285 + 20 * i, 40 + j * 20, 20, 20);
+                    llb[i][j] = new JLabel(String.valueOf(topTable.get(i, j)), SwingConstants.CENTER);
+                    llb[i][j].setFont(new Font("微软雅黑", Font.PLAIN, 35));
+                    llb[i][j].setBounds(250 + 50 * i, 50 + j * 50, 50, 50);
                     root.add(llb[i][j]);
                 }
             }
@@ -105,8 +110,9 @@ public class mainWindow extends JFrame {
         for (int i = 0; i < 5; ++i) {
             for (int j = 0; j < 3; ++j) {
                 if (leftTable.get(i, j) != 0) {
-                    hlb[i][j] = new JLabel(String.valueOf(leftTable.get(i, j)));
-                    hlb[i][j].setBounds(225 + 20 * j, 100 + i * 20, 20, 20);
+                    hlb[i][j] = new JLabel(String.valueOf(leftTable.get(i, j)), SwingConstants.CENTER);
+                    hlb[i][j].setFont(new Font("微软雅黑", Font.PLAIN, 35));
+                    hlb[i][j].setBounds(100 + 50 * j, 200 + i * 50, 50, 50);
                     root.add(hlb[i][j]);
                 }
             }
@@ -117,7 +123,7 @@ public class mainWindow extends JFrame {
             for (int j = 0; j < 5; ++j) {
                 bt[i][j] = new JButton();
                 bt[i][j].setBackground(Color.WHITE);
-                bt[i][j].setBounds(280 + 20 * j, 100 + 20 * i, 20, 20);
+                bt[i][j].setBounds(250 + 50 * j, 200 + 50 * i, 50, 50);
                 root.add(bt[i][j]);
                 int finalI = i;
                 int finalJ = j;
@@ -140,20 +146,20 @@ public class mainWindow extends JFrame {
         //游戏界面边框
         JPanel panel = new JPanel();
         panel.setBackground(Color.WHITE);
-        panel.setBorder(new LineBorder(new Color(0, 0, 0)));
-        panel.setBounds(220, 40, 60, 60);
+        panel.setBorder(new LineBorder(Color.BLACK));
+        panel.setBounds(100, 50, 150, 150);
         root.add(panel);
 
         JPanel panel_1 = new JPanel();
         panel_1.setBackground(Color.WHITE);
-        panel_1.setBorder(new LineBorder(new Color(0, 0, 0)));
-        panel_1.setBounds(280, 40, 100, 60);
+        panel_1.setBorder(new LineBorder(Color.BLACK));
+        panel_1.setBounds(250, 50, 250, 150);
         root.add(panel_1);
 
         JPanel panel_2 = new JPanel();
         panel_2.setBackground(Color.WHITE);
-        panel_2.setBorder(new LineBorder(new Color(0, 0, 0)));
-        panel_2.setBounds(220, 100, 60, 100);
+        panel_2.setBorder(new LineBorder(Color.BLACK));
+        panel_2.setBounds(100, 200, 150, 250);
         root.add(panel_2);
         //装饰性标题
         JLabel title = new JLabel("Nanograms");

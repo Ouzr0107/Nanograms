@@ -12,7 +12,7 @@ interface data<N> {
 //游戏数据父类
 public class game implements data {
     private int n, m;
-    private int[][] list;
+    private final int[][] list;
 
     game(int n, int m) {
         this.n = n;
@@ -78,15 +78,15 @@ class table extends game {
     boolean judge() {
         for (int i = 0; i < getN(); ++i) {
             if (get(i, 0) == 0) {
-                return false;
+                return true;
             }
             for (int j = 0; j < getM(); ++j) {
                 if (get(i, j) == 5) {
-                    return false;
+                    return true;
                 }
             }
         }
-        return true;
+        return false;
     }
 
     void init(int[][] list) {

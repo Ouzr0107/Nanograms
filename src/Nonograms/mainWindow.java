@@ -5,6 +5,7 @@ import javax.swing.border.*;
 import java.awt.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Time;
 
 public class mainWindow extends JFrame {
     public static void main(String[] args) {
@@ -22,12 +23,11 @@ public class mainWindow extends JFrame {
 
     public mainWindow() {
         //游戏数据生成
-        sqlControl conn = new sqlControl();
         var startTime = System.currentTimeMillis();
         var ans = new answer(5, 5);
         var topTable = new table(5, 3, 1, ans.getList());
         var leftTable = new table(5, 3, 0, ans.getList());
-        while (!topTable.judge() || !leftTable.judge()) {
+        while (topTable.judge() || leftTable.judge()) {
             ans.init();
             topTable.init(ans.getList());
             leftTable.init(ans.getList());
@@ -46,7 +46,7 @@ public class mainWindow extends JFrame {
         Dimension screenSize = kit.getScreenSize();
         int screenWidth = screenSize.width;
         int screenHeight = screenSize.height;
-        setTitle("Nonograms");
+        setTitle("数织游戏");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setBounds((screenWidth - 600) / 2, (screenHeight - 600) / 2, 600, 600);
         setResizable(false);
@@ -57,7 +57,7 @@ public class mainWindow extends JFrame {
         root.setLayout(null);
         //底部三个按钮
         JButton bt1 = new JButton("怎么玩？");
-        bt1.addActionListener(e -> JOptionPane.showMessageDialog(null, "Nonograms是一种逻辑性图片益智游戏，\n玩家根据网格旁的数字，将网格中的方格填色或留空，从而展现一副隐藏的图画。\n这些数字通过离散断层方式来计算有多少条完整的线会被填入到横向或纵向的方格中。\n例如，“4 8 3”表示按顺序分别有4个、8个和3个连续方格要填色，\n且各组填色方格之间至少有一个留空方格。"));
+        bt1.addActionListener(e -> JOptionPane.showMessageDialog(null, "数织游戏是一种逻辑性图片益智游戏，\n玩家根据网格旁的数字，将网格中的方格填色或留空，从而展现一副隐藏的图画。\n这些数字通过离散断层方式来计算有多少条完整的线会被填入到横向或纵向的方格中。\n例如，“4 8 3”表示按顺序分别有4个、8个和3个连续方格要填色，\n且各组填色方格之间至少有一个留空方格。"));
         bt1.setFont(new Font("微软雅黑", Font.PLAIN, 24));
         bt1.setBounds(20, 500, 130, 50);
         root.add(bt1);
@@ -70,15 +70,18 @@ public class mainWindow extends JFrame {
             var userLeftTable = new table(5, 3, 0, user.getList());
             if (userTopTable.arrayEquals(topTable.getList()) && userLeftTable.arrayEquals(leftTable.getList())) {
                 var endTime = System.currentTimeMillis();
+                var time = new Time(-28800 * 1000 + endTime - startTime);
+                System.out.println(time);
                 var name = new StringBuilder(JOptionPane.showInputDialog("您的解答是对的， 请输入您的名字"));
                 while (name.length() == 0) {
                     name.append(JOptionPane.showInputDialog("请输入您的名字"));
                 }
+                sqlControl conn = new sqlControl();
                 Object[] obj = {};
-                ResultSet res = conn.select("select * from list", obj);
+                ResultSet res = conn.select("select * from rankList", obj);
                 try {
                     while (res.next()) {
-                        System.out.println(res.getString("userName"));
+                        System.out.println(res.getString("playerName"));
                     }
                 } catch (SQLException ex) {
                     throw new RuntimeException(ex);
@@ -93,6 +96,7 @@ public class mainWindow extends JFrame {
         JButton bt3 = new JButton("排行榜");
         bt3.setFont(new Font("微软雅黑", Font.PLAIN, 24));
         bt3.setBounds(450, 500, 130, 50);
+        bt3.addActionListener(e -> rankList(this, screenWidth, screenHeight));
         root.add(bt3);
         //创建纵横数字栏
         JLabel[][] llb = new JLabel[5][3];
@@ -162,9 +166,65 @@ public class mainWindow extends JFrame {
         panel_2.setBounds(100, 200, 150, 250);
         root.add(panel_2);
         //装饰性标题
-        JLabel title = new JLabel("Nanograms");
+        JLabel title = new JLabel("数织游戏");
         title.setFont(new Font("微软雅黑", Font.PLAIN, 25));
         title.setBounds(230, 0, 150, 35);
         root.add(title);
+    }
+
+    void rankList(Frame frame, int screenWidth, int screenHeight) {
+        var rankList = new JDialog(frame, true);
+        var pn = new JPanel(null);
+        pn.setBorder(new EmptyBorder(5, 5, 5, 5));
+        rankList.add(pn);
+        rankList.setTitle("排行榜");
+        rankList.setBounds((screenWidth - 600) / 2, (screenHeight - 600) / 2, 600, 600);
+        var lb1 = new JLabel("排名",SwingConstants.CENTER);
+        lb1.setBounds(0, 0, 200, 50);
+        lb1.setFont(new Font("微软雅黑", Font.PLAIN, 35));
+        pn.add(lb1);
+        var lb2 = new JLabel("名字");
+        lb2.setBounds(200, 0, 200, 50);
+        lb2.setFont(new Font("微软雅黑", Font.PLAIN, 35));
+        pn.add(lb2);
+        var lb3 = new JLabel("所用时间");
+        lb3.setBounds(375, 0, 200, 50);
+        lb3.setFont(new Font("微软雅黑", Font.PLAIN, 35));
+        pn.add(lb3);
+        JLabel[][] list = new JLabel[10][3];
+        int i = 0, j = 0;
+        sqlControl conn = new sqlControl();
+        Object[] obj = {};
+        ResultSet res = conn.select("select * from rankList order by playTime limit 10", obj);
+        try {
+            while (res.next()) {
+                while (j < 3) {
+                    switch (j) {
+                        case 0 -> {
+                            list[i][j] = new JLabel(String.valueOf(i + 1), SwingConstants.CENTER);
+                            list[i][j].setBounds(50, 50 + 50 * i, 100, 50);
+                        }
+                        case 1 -> {
+                            list[i][j] = new JLabel(res.getString("playerName"));
+                            list[i][j].setBounds(200, 50 + 50 * i, 200, 50);
+                        }
+                        case 2 -> {
+                            list[i][j] = new JLabel(res.getString("playTime"));
+                            list[i][j].setBounds(400, 50 + 50 * i, 200, 50);
+                        }
+                    }
+                    list[i][j].setFont(new Font("微软雅黑", Font.PLAIN, 35));
+                    pn.add(list[i][j]);
+                    ++j;
+                }
+                ++i;
+                j = 0;
+                System.out.println(res.getString("playerName"));
+            }
+        } catch (SQLException ex) {
+            throw new RuntimeException(ex);
+        }
+        conn.closeConnection();
+        rankList.setVisible(true);
     }
 }

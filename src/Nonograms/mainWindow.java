@@ -61,6 +61,7 @@ public class mainWindow extends JFrame {
         JPanel root = new JPanel();//生成面板
         root.setBorder(new EmptyBorder(5, 5, 5, 5));//内部边框
         setContentPane(root);
+        root.setBackground(new Color(255, 255, 254));
         root.setLayout(null);//绝对布局
 
         //计时标签
@@ -68,6 +69,7 @@ public class mainWindow extends JFrame {
         var timeLabel = new JLabel("已用时间：" + timeStr, SwingConstants.CENTER);
         timeLabel.setBounds(100, 0, 400, 50);
         timeLabel.setFont(getSelfDefinedFont(35));
+        timeLabel.setForeground(new Color(9, 64, 103));
         root.add(timeLabel);
         ActionListener taskPerformer = e -> {//每秒变化
             var timeStr1 = new Time(-28800 * 1000 + System.currentTimeMillis() - startTime);
@@ -80,12 +82,17 @@ public class mainWindow extends JFrame {
         JButton bt1 = new JButton("怎么玩？");//说明窗口
         bt1.addActionListener(e -> JOptionPane.showMessageDialog(null, "<html><div style=\"font-family: Ubuntu; font-size: 20px; width: 300px\">数织游戏是一种逻辑性图片益智游戏，玩家根据网格旁的数字，将网格中的方格填色或留空，从而展现一副隐藏的图画。 这些数字通过离散断层方式来计算有多少条完整的线会被填入到横向或纵向的方格中。例如，“4 8 3”表示按顺序分别有4个、8个和3个连续方格要填色，且各组填色方格之间至少有一个留空方格。</div></html>"));
         bt1.setFont(getSelfDefinedFont(24));
-        bt1.setBounds(20, 500, 130, 50);
+        bt1.setForeground(new Color(255, 255, 254));
+        bt1.setBackground(new Color(61, 169, 252));
+        bt1.setBorder(null);
+        bt1.setBounds(20, 480, 130, 50);
         root.add(bt1);
 
         JButton bt2 = new JButton("提交");//提交答案
         bt2.setFont(getSelfDefinedFont(35));
-        bt2.setBounds(160, 500, 280, 50);
+        bt2.setForeground(new Color(255, 255, 254));
+        bt2.setBackground(new Color(61, 169, 252));
+        bt2.setBounds(160, 480, 280, 50);
         bt2.addActionListener(e -> {
             var userTopTable = new table(5, 3, 1, user.getList());//根据用户回答生成顶栏和侧栏数据
             var userLeftTable = new table(5, 3, 0, user.getList());
@@ -108,7 +115,7 @@ public class mainWindow extends JFrame {
                 try {
                     if (res.next() && res.getInt(1) != 0) {//如果数据库中有该名字
                         res = conn.select("select * from rankList where playerName = '" + name + "'", obj);//获取数据库用户的时间
-                        if (res.next() && res.getTime("playTime").getTime() > time.getTime()){//比较，若时间更短则更新
+                        if (res.next() && res.getTime("playTime").getTime() > time.getTime()) {//比较，若时间更短则更新
                             conn.update("update rankList set `playTime` = '" + time + "' where `playerName` = '" + name + "'", obj);
                         }
                     } else {//若没有该用户则将数据插入
@@ -127,7 +134,10 @@ public class mainWindow extends JFrame {
 
         JButton bt3 = new JButton("排行榜");//排行榜前十显示
         bt3.setFont(getSelfDefinedFont(24));
-        bt3.setBounds(450, 500, 130, 50);
+        bt3.setBackground(new Color(61, 169, 252));
+        bt3.setForeground(new Color(255, 255, 254));
+        bt3.setBorder(null);
+        bt3.setBounds(450, 480, 130, 50);
         bt3.addActionListener(e -> rankList(this, screenWidth, screenHeight));//生成排行榜
         root.add(bt3);
 
@@ -135,24 +145,28 @@ public class mainWindow extends JFrame {
         JLabel[][] llb = new JLabel[5][3];//顶栏
         for (int i = 0; i < 5; ++i) {
             for (int j = 0; j < 3; ++j) {
+                llb[i][j] = new JLabel("", SwingConstants.CENTER);
                 if (topTable.get(i, j) != 0) {
-                    llb[i][j] = new JLabel(String.valueOf(topTable.get(i, j)), SwingConstants.CENTER);
-                    llb[i][j].setFont(getSelfDefinedFont(35));
-                    llb[i][j].setBounds(250 + 50 * i, 50 + j * 50, 50, 50);
-                    root.add(llb[i][j]);
+                    llb[i][j].setText(String.valueOf(topTable.get(i, j)));
                 }
+                llb[i][j].setFont(getSelfDefinedFont(35));
+                llb[i][j].setBorder(new LineBorder(new Color(144, 180, 206), 2));
+                llb[i][j].setBounds(250 + 50 * i, 50 + j * 50, 50, 50);
+                root.add(llb[i][j]);
             }
         }
 
         JLabel[][] hlb = new JLabel[5][3];//侧栏
         for (int i = 0; i < 5; ++i) {
             for (int j = 0; j < 3; ++j) {
+                hlb[i][j] = new JLabel("", SwingConstants.CENTER);
+                hlb[i][j].setFont(getSelfDefinedFont(35));
                 if (leftTable.get(i, j) != 0) {
-                    hlb[i][j] = new JLabel(String.valueOf(leftTable.get(i, j)), SwingConstants.CENTER);
-                    hlb[i][j].setFont(getSelfDefinedFont(35));
-                    hlb[i][j].setBounds(100 + 50 * j, 200 + i * 50, 50, 50);
-                    root.add(hlb[i][j]);
+                    hlb[i][j].setText(String.valueOf(topTable.get(i, j)));
                 }
+                hlb[i][j].setBorder(new LineBorder(new Color(144, 180, 206), 2));
+                hlb[i][j].setBounds(100 + 50 * j, 200 + i * 50, 50, 50);
+                root.add(hlb[i][j]);
             }
         }
 
@@ -161,7 +175,8 @@ public class mainWindow extends JFrame {
         for (int i = 0; i < 5; ++i) {
             for (int j = 0; j < 5; ++j) {
                 bt[i][j] = new JButton();
-                bt[i][j].setBackground(Color.WHITE);
+                bt[i][j].setBackground(new Color(216, 238, 254));
+                bt[i][j].setBorder(new LineBorder(new Color(9, 64, 103), 2));
                 bt[i][j].setBounds(250 + 50 * j, 200 + 50 * i, 50, 50);
                 root.add(bt[i][j]);
                 int finalI = i;
@@ -175,53 +190,69 @@ public class mainWindow extends JFrame {
                     }
                     user.set(finalI, finalJ, n);
                     if (user.get(finalI, finalJ) == 0) {
-                        bt[finalI][finalJ].setBackground(Color.WHITE);
+                        bt[finalI][finalJ].setBackground(new Color(216, 238, 254));
                     } else {
-                        bt[finalI][finalJ].setBackground(Color.BLACK);
+                        bt[finalI][finalJ].setBackground(new Color(9, 64, 103));
                     }
                 });
             }
         }
 
+        //左上角标题
+        var title1 = new JLabel("数 织", SwingConstants.CENTER);
+        title1.setFont(getSelfDefinedFont(60));
+        title1.setForeground(new Color(9, 64, 103));
+        title1.setBounds(100, 50, 150, 75);
+        root.add(title1);
+
+        var title2 = new JLabel("游 戏", SwingConstants.CENTER);
+        title2.setFont(getSelfDefinedFont(60));
+        title2.setForeground(new Color(95, 108, 123));
+        title2.setBounds(100, 125, 150, 75);
+        root.add(title2);
+
         //游戏界面底部边框
         JPanel panel = new JPanel();
-        panel.setBackground(Color.WHITE);
-        panel.setBorder(new LineBorder(Color.BLACK));
-        panel.setBounds(100, 50, 150, 150);
+        panel.setBackground(new Color(216, 238, 254));
+        panel.setBorder(new LineBorder(new Color(9, 64, 103), 2));
+        panel.setBounds(99, 49, 151, 151);
         root.add(panel);
 
         JPanel panel_1 = new JPanel();
-        panel_1.setBackground(Color.WHITE);
-        panel_1.setBorder(new LineBorder(Color.BLACK));
-        panel_1.setBounds(250, 50, 250, 150);
+        panel_1.setBackground(new Color(216, 238, 254));
+        panel_1.setBorder(new LineBorder(new Color(9, 64, 103), 4));
+        panel_1.setBounds(250, 49, 251, 151);
         root.add(panel_1);
 
         JPanel panel_2 = new JPanel();
-        panel_2.setBackground(Color.WHITE);
-        panel_2.setBorder(new LineBorder(Color.BLACK));
-        panel_2.setBounds(100, 200, 150, 250);
+        panel_2.setBackground(new Color(216, 238, 254));
+        panel_2.setBorder(new LineBorder(new Color(9, 64, 103), 4));
+        panel_2.setBounds(99, 200, 151, 251);
         root.add(panel_2);
     }
 
     //排行版面板
     void rankList(Frame frame, int screenWidth, int screenHeight) {
-        var rankList = new JDialog(frame, true);
+        var rankList = new JDialog(frame, false);
         var pn = new JPanel(null);
         pn.setBorder(new EmptyBorder(5, 5, 5, 5));
         rankList.add(pn);
         rankList.setTitle("排行榜");
-        rankList.setBounds((screenWidth - 600) / 2, (screenHeight - 600) / 2, 600, 600);
+        rankList.setBounds((screenWidth - 600) / 2 + 600, (screenHeight - 600) / 2, 500, 600);
         var lb1 = new JLabel("排名", SwingConstants.CENTER);
-        lb1.setBounds(0, 0, 200, 50);
+        lb1.setBounds(0, 0, 100, 50);
         lb1.setFont(getSelfDefinedFont(35));
+        lb1.setForeground(new Color(9, 64, 103));
         pn.add(lb1);
         var lb2 = new JLabel("名字");
-        lb2.setBounds(200, 0, 200, 50);
+        lb2.setBounds(150, 0, 200, 50);
         lb2.setFont(getSelfDefinedFont(35));
+        lb2.setForeground(new Color(9, 64, 103));
         pn.add(lb2);
         var lb3 = new JLabel("所用时间");
-        lb3.setBounds(375, 0, 200, 50);
+        lb3.setBounds(300, 0, 200, 50);
         lb3.setFont(getSelfDefinedFont(35));
+        lb3.setForeground(new Color(9, 64, 103));
         pn.add(lb3);
         JLabel[][] list = new JLabel[10][3];
         int i = 0, j = 0;
@@ -234,18 +265,19 @@ public class mainWindow extends JFrame {
                     switch (j) {
                         case 0 -> {
                             list[i][j] = new JLabel(String.valueOf(i + 1), SwingConstants.CENTER);
-                            list[i][j].setBounds(50, 50 + 50 * i, 100, 50);
+                            list[i][j].setBounds(0, 50 + 50 * i, 100, 50);
                         }
                         case 1 -> {
                             list[i][j] = new JLabel(res.getString("playerName"));
-                            list[i][j].setBounds(200, 50 + 50 * i, 200, 50);
+                            list[i][j].setBounds(120, 50 + 50 * i, 200, 50);
                         }
                         case 2 -> {
                             list[i][j] = new JLabel(res.getString("playTime"));
-                            list[i][j].setBounds(400, 50 + 50 * i, 200, 50);
+                            list[i][j].setBounds(300, 50 + 50 * i, 200, 50);
                         }
                     }
                     list[i][j].setFont(getSelfDefinedFont(35));
+                    list[i][j].setForeground(new Color(95, 108, 123));
                     pn.add(list[i][j]);
                     ++j;
                 }
@@ -265,7 +297,7 @@ public class mainWindow extends JFrame {
         File file = new File("src/Nonograms/HarmonyOS_Sans_SC_Regular.ttf");//鸿蒙简体中文字体
         try {
             font = java.awt.Font.createFont(java.awt.Font.TRUETYPE_FONT, file);
-            font = font.deriveFont(java.awt.Font.PLAIN, size);
+            font = font.deriveFont(Font.BOLD, size);
         } catch (FontFormatException | IOException e) {
             return null;
         }

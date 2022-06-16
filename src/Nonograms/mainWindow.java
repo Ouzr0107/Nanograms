@@ -105,7 +105,7 @@ public class mainWindow extends JFrame {
                 //显示名字输入
                 var name = new StringBuilder(JOptionPane.showInputDialog("<html><div style=\"font-family: Ubuntu; font-size: 15px; width: 300px\">您的解答是对的， 请输入您的名字</div></html>"));
                 while (name.toString().trim().length() == 0) {//若输入空白则再弹出
-                    name.append(JOptionPane.showInputDialog(null, "<html><div style=\"font-family: Ubuntu; font-size: 15px; width: 300px\">请输入您的名字</div></html>"));
+                    name.append(JOptionPane.showInputDialog( "<html><div style=\"font-family: Ubuntu; font-size: 15px; width: 300px\">请输入您的名字</div></html>"));
                 }
 
                 //数据库连接

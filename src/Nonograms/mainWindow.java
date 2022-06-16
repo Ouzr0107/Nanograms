@@ -162,7 +162,7 @@ public class mainWindow extends JFrame {
                 hlb[i][j] = new JLabel("", SwingConstants.CENTER);
                 hlb[i][j].setFont(getSelfDefinedFont(35));
                 if (leftTable.get(i, j) != 0) {
-                    hlb[i][j].setText(String.valueOf(topTable.get(i, j)));
+                    hlb[i][j].setText(String.valueOf(leftTable.get(i, j)));
                 }
                 hlb[i][j].setBorder(new LineBorder(new Color(144, 180, 206), 2));
                 hlb[i][j].setBounds(100 + 50 * j, 200 + i * 50, 50, 50);

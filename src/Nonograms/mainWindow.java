@@ -1,8 +1,12 @@
 package Nonograms;
 
 import javax.swing.*;
-import javax.swing.border.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import java.awt.*;
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Time;
@@ -23,17 +27,19 @@ public class mainWindow extends JFrame {
 
     public mainWindow() {
         //游戏数据生成
-        var startTime = System.currentTimeMillis();
-        var ans = new answer(5, 5);
-        var topTable = new table(5, 3, 1, ans.getList());
-        var leftTable = new table(5, 3, 0, ans.getList());
+        var startTime = System.currentTimeMillis();//记录当前时间
+        var ans = new answer(5, 5);//生成答案
+        var topTable = new table(5, 3, 1, ans.getList());//顶栏数据
+        var leftTable = new table(5, 3, 0, ans.getList());//侧栏数据
+        //判断生成游戏是否符合规则
         while (topTable.judge() || leftTable.judge()) {
             ans.init();
             topTable.init(ans.getList());
             leftTable.init(ans.getList());
         }
-        var user = new sub(5, 5);
+        var user = new sub(5, 5);//生成用户数据
 
+        //命令行答案
         for (int i = 0; i < 5; ++i) {
             for (int j = 0; j < 5; ++j) {
                 System.out.print(ans.get(i, j) + " ");
@@ -42,85 +48,114 @@ public class mainWindow extends JFrame {
         }
 
         //窗口参数设置
-        Toolkit kit = Toolkit.getDefaultToolkit();
+        Toolkit kit = Toolkit.getDefaultToolkit();//读取屏幕参数
         Dimension screenSize = kit.getScreenSize();
         int screenWidth = screenSize.width;
         int screenHeight = screenSize.height;
-        setTitle("数织游戏");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setBounds((screenWidth - 600) / 2, (screenHeight - 600) / 2, 600, 600);
-        setResizable(false);
+        setTitle("数织游戏");//设置标题
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);//关闭参数
+        setBounds((screenWidth - 600) / 2, (screenHeight - 600) / 2, 600, 600);//设置在屏幕中间，大小600*600
+        setResizable(false);//不可改变大小
+
         //创建主面板
-        JPanel root = new JPanel();
-        root.setBorder(new EmptyBorder(5, 5, 5, 5));
+        JPanel root = new JPanel();//生成面板
+        root.setBorder(new EmptyBorder(5, 5, 5, 5));//内部边框
         setContentPane(root);
-        root.setLayout(null);
+        root.setLayout(null);//绝对布局
+
+        //计时标签
+        var timeStr = new Time(-28800 * 1000 + System.currentTimeMillis() - startTime);//初始化
+        var timeLabel = new JLabel("已用时间：" + timeStr, SwingConstants.CENTER);
+        timeLabel.setBounds(100, 0, 400, 50);
+        timeLabel.setFont(getSelfDefinedFont(35));
+        root.add(timeLabel);
+        ActionListener taskPerformer = e -> {//每秒变化
+            var timeStr1 = new Time(-28800 * 1000 + System.currentTimeMillis() - startTime);
+            timeLabel.setText("已用时间：" + timeStr1);
+        };
+        var timer = new Timer(1000, taskPerformer);
+        timer.start();//开始计时
+
         //底部三个按钮
-        JButton bt1 = new JButton("怎么玩？");
-        bt1.addActionListener(e -> JOptionPane.showMessageDialog(null, "数织游戏是一种逻辑性图片益智游戏，\n玩家根据网格旁的数字，将网格中的方格填色或留空，从而展现一副隐藏的图画。\n这些数字通过离散断层方式来计算有多少条完整的线会被填入到横向或纵向的方格中。\n例如，“4 8 3”表示按顺序分别有4个、8个和3个连续方格要填色，\n且各组填色方格之间至少有一个留空方格。"));
-        bt1.setFont(new Font("微软雅黑", Font.PLAIN, 24));
+        JButton bt1 = new JButton("怎么玩？");//说明窗口
+        bt1.addActionListener(e -> JOptionPane.showMessageDialog(null, "<html><div style=\"font-family: Ubuntu; font-size: 20px; width: 300px\">数织游戏是一种逻辑性图片益智游戏，玩家根据网格旁的数字，将网格中的方格填色或留空，从而展现一副隐藏的图画。 这些数字通过离散断层方式来计算有多少条完整的线会被填入到横向或纵向的方格中。例如，“4 8 3”表示按顺序分别有4个、8个和3个连续方格要填色，且各组填色方格之间至少有一个留空方格。</div></html>"));
+        bt1.setFont(getSelfDefinedFont(24));
         bt1.setBounds(20, 500, 130, 50);
         root.add(bt1);
 
-        JButton bt2 = new JButton("提交");
-        bt2.setFont(new Font("微软雅黑", Font.PLAIN, 45));
+        JButton bt2 = new JButton("提交");//提交答案
+        bt2.setFont(getSelfDefinedFont(35));
         bt2.setBounds(160, 500, 280, 50);
         bt2.addActionListener(e -> {
-            var userTopTable = new table(5, 3, 1, user.getList());
+            var userTopTable = new table(5, 3, 1, user.getList());//根据用户回答生成顶栏和侧栏数据
             var userLeftTable = new table(5, 3, 0, user.getList());
-            if (userTopTable.arrayEquals(topTable.getList()) && userLeftTable.arrayEquals(leftTable.getList())) {
+            if (userTopTable.arrayEquals(topTable.getList()) && userLeftTable.arrayEquals(leftTable.getList())) {//根据两栏的数据判断正确与否，因为可能有多解
+
+                timer.stop();//计时器暂停
                 var endTime = System.currentTimeMillis();
-                var time = new Time(-28800 * 1000 + endTime - startTime);
-                System.out.println(time);
-                var name = new StringBuilder(JOptionPane.showInputDialog("您的解答是对的， 请输入您的名字"));
-                while (name.length() == 0) {
-                    name.append(JOptionPane.showInputDialog("请输入您的名字"));
+                var time = new Time(-28800 * 1000 + endTime - startTime);//计算使用时间
+
+                //显示名字输入
+                var name = new StringBuilder(JOptionPane.showInputDialog("<html><div style=\"font-family: Ubuntu; font-size: 15px; width: 300px\">您的解答是对的， 请输入您的名字</div></html>"));
+                while (name.toString().trim().length() == 0) {//若输入空白则再弹出
+                    name.append(JOptionPane.showInputDialog(null, "<html><div style=\"font-family: Ubuntu; font-size: 15px; width: 300px\">请输入您的名字</div></html>"));
                 }
+
+                //数据库连接
                 sqlControl conn = new sqlControl();
-                Object[] obj = {};
-                ResultSet res = conn.select("select * from rankList", obj);
+                Object[] obj = {};//新建空白类
+                ResultSet res = conn.select("select count(*) from rankList where playerName = '" + name + "'", obj);//读取结果
                 try {
-                    while (res.next()) {
-                        System.out.println(res.getString("playerName"));
+                    if (res.next() && res.getInt(1) != 0) {//如果数据库中有该名字
+                        res = conn.select("select * from rankList where playerName = '" + name + "'", obj);//获取数据库用户的时间
+                        if (res.next() && res.getTime("playTime").getTime() > time.getTime()){//比较，若时间更短则更新
+                            conn.update("update rankList set `playTime` = '" + time + "' where `playerName` = '" + name + "'", obj);
+                        }
+                    } else {//若没有该用户则将数据插入
+                        Object[] objs = {name.toString(), time};
+                        conn.update("insert into rankList values(?, ?)", objs);
                     }
                 } catch (SQLException ex) {
                     throw new RuntimeException(ex);
                 }
-                conn.closeConnection();
-            } else {
-                JOptionPane.showMessageDialog(null, "您的解答有误。");
+                conn.closeConnection();//断开连接
+            } else {//错误答案提醒
+                JOptionPane.showMessageDialog(null, "<html><div style=\"font-family: Ubuntu; font-size: 15px; width: 300px\">您的解答有误。</div></html>");
             }
         });
         root.add(bt2);
 
-        JButton bt3 = new JButton("排行榜");
-        bt3.setFont(new Font("微软雅黑", Font.PLAIN, 24));
+        JButton bt3 = new JButton("排行榜");//排行榜前十显示
+        bt3.setFont(getSelfDefinedFont(24));
         bt3.setBounds(450, 500, 130, 50);
-        bt3.addActionListener(e -> rankList(this, screenWidth, screenHeight));
+        bt3.addActionListener(e -> rankList(this, screenWidth, screenHeight));//生成排行榜
         root.add(bt3);
+
         //创建纵横数字栏
-        JLabel[][] llb = new JLabel[5][3];
+        JLabel[][] llb = new JLabel[5][3];//顶栏
         for (int i = 0; i < 5; ++i) {
             for (int j = 0; j < 3; ++j) {
                 if (topTable.get(i, j) != 0) {
                     llb[i][j] = new JLabel(String.valueOf(topTable.get(i, j)), SwingConstants.CENTER);
-                    llb[i][j].setFont(new Font("微软雅黑", Font.PLAIN, 35));
+                    llb[i][j].setFont(getSelfDefinedFont(35));
                     llb[i][j].setBounds(250 + 50 * i, 50 + j * 50, 50, 50);
                     root.add(llb[i][j]);
                 }
             }
         }
-        JLabel[][] hlb = new JLabel[5][3];
+
+        JLabel[][] hlb = new JLabel[5][3];//侧栏
         for (int i = 0; i < 5; ++i) {
             for (int j = 0; j < 3; ++j) {
                 if (leftTable.get(i, j) != 0) {
                     hlb[i][j] = new JLabel(String.valueOf(leftTable.get(i, j)), SwingConstants.CENTER);
-                    hlb[i][j].setFont(new Font("微软雅黑", Font.PLAIN, 35));
+                    hlb[i][j].setFont(getSelfDefinedFont(35));
                     hlb[i][j].setBounds(100 + 50 * j, 200 + i * 50, 50, 50);
                     root.add(hlb[i][j]);
                 }
             }
         }
+
         //创造数织界面
         JButton[][] bt = new JButton[5][5];
         for (int i = 0; i < 5; ++i) {
@@ -147,7 +182,8 @@ public class mainWindow extends JFrame {
                 });
             }
         }
-        //游戏界面边框
+
+        //游戏界面底部边框
         JPanel panel = new JPanel();
         panel.setBackground(Color.WHITE);
         panel.setBorder(new LineBorder(Color.BLACK));
@@ -165,13 +201,9 @@ public class mainWindow extends JFrame {
         panel_2.setBorder(new LineBorder(Color.BLACK));
         panel_2.setBounds(100, 200, 150, 250);
         root.add(panel_2);
-        //装饰性标题
-        JLabel title = new JLabel("数织游戏");
-        title.setFont(new Font("微软雅黑", Font.PLAIN, 25));
-        title.setBounds(230, 0, 150, 35);
-        root.add(title);
     }
 
+    //排行版面板
     void rankList(Frame frame, int screenWidth, int screenHeight) {
         var rankList = new JDialog(frame, true);
         var pn = new JPanel(null);
@@ -179,23 +211,23 @@ public class mainWindow extends JFrame {
         rankList.add(pn);
         rankList.setTitle("排行榜");
         rankList.setBounds((screenWidth - 600) / 2, (screenHeight - 600) / 2, 600, 600);
-        var lb1 = new JLabel("排名",SwingConstants.CENTER);
+        var lb1 = new JLabel("排名", SwingConstants.CENTER);
         lb1.setBounds(0, 0, 200, 50);
-        lb1.setFont(new Font("微软雅黑", Font.PLAIN, 35));
+        lb1.setFont(getSelfDefinedFont(35));
         pn.add(lb1);
         var lb2 = new JLabel("名字");
         lb2.setBounds(200, 0, 200, 50);
-        lb2.setFont(new Font("微软雅黑", Font.PLAIN, 35));
+        lb2.setFont(getSelfDefinedFont(35));
         pn.add(lb2);
         var lb3 = new JLabel("所用时间");
         lb3.setBounds(375, 0, 200, 50);
-        lb3.setFont(new Font("微软雅黑", Font.PLAIN, 35));
+        lb3.setFont(getSelfDefinedFont(35));
         pn.add(lb3);
         JLabel[][] list = new JLabel[10][3];
         int i = 0, j = 0;
         sqlControl conn = new sqlControl();
         Object[] obj = {};
-        ResultSet res = conn.select("select * from rankList order by playTime limit 10", obj);
+        ResultSet res = conn.select("select * from rankList order by playTime limit 10", obj);//读取前十名
         try {
             while (res.next()) {
                 while (j < 3) {
@@ -213,18 +245,30 @@ public class mainWindow extends JFrame {
                             list[i][j].setBounds(400, 50 + 50 * i, 200, 50);
                         }
                     }
-                    list[i][j].setFont(new Font("微软雅黑", Font.PLAIN, 35));
+                    list[i][j].setFont(getSelfDefinedFont(35));
                     pn.add(list[i][j]);
                     ++j;
                 }
                 ++i;
                 j = 0;
-                System.out.println(res.getString("playerName"));
             }
         } catch (SQLException ex) {
             throw new RuntimeException(ex);
         }
         conn.closeConnection();
         rankList.setVisible(true);
+    }
+
+    //字体本地读取
+    static java.awt.Font getSelfDefinedFont(int size) {
+        java.awt.Font font;
+        File file = new File("src/Nonograms/HarmonyOS_Sans_SC_Regular.ttf");//鸿蒙简体中文字体
+        try {
+            font = java.awt.Font.createFont(java.awt.Font.TRUETYPE_FONT, file);
+            font = font.deriveFont(java.awt.Font.PLAIN, size);
+        } catch (FontFormatException | IOException e) {
+            return null;
+        }
+        return font;
     }
 }

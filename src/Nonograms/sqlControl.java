@@ -9,9 +9,9 @@ public class sqlControl {
 
     static {
         try {
-            url = "jdbc:mysql://localhost:3306/rankList?";
-            user = "root";
-            pwd = "!Jian10316210";
+            url = "jdbc:mysql://localhost:3306/rankList";
+            user = "Nanograms";
+            pwd = "@Jian10316210";
             String driver = "com.mysql.cj.jdbc.Driver";
             Class.forName(driver);
         } catch (ClassNotFoundException e) {

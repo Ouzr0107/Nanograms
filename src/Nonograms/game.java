@@ -57,7 +57,7 @@ class answer extends game {
         init();
     }
 
-    void init() {
+    void init() {//答案重置
         var rd = new Random();
         for (int i = 0; i < getN(); ++i) {
             for (int j = 0; j < getM(); ++j) {
@@ -134,24 +134,19 @@ class table extends game {
         }
     }
 
-    public boolean arrayEquals(int[][] array2) {
-
+    public boolean arrayEquals(int[][] array2) {//比较二维数组
         if (getList() == array2)
             return true;
         if (getList() == null || array2 == null)
             return false;
-
         if (getList().length != array2.length)
             return false;
-
         if (getList()[0].length != array2[0].length)
             return false;
-
         for (int i = 0; i < getList().length; i++) {  //二维数组中的每个数组使用equals方法比较
             if (!Arrays.equals(getList()[i], array2[i]))
-                return false;  //有一个为false，返回false
+                return false;
         }
-
         return true;
     }
 

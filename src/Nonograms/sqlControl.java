@@ -53,7 +53,7 @@ public class sqlControl {
     }
 
     public int update(String sql, Object[] objs) {
-        // 增删改操作
+        // 增改操作
         int i = 0;
         try {
             getConnection();

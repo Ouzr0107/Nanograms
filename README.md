@@ -1,2 +1,2 @@
 # Nanograms
-A Nanograms coded by Java.
+A Java Nanograms game.
